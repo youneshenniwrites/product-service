@@ -27,9 +27,19 @@ export class LambdaStack extends Stack {
       runtime: Runtime.NODEJS_18_X,
     };
 
-    this.productLambda = new LambdaFunction(this, "productLambda", {
+    this.productLambda = this.createLambdaFunction(
+      "productLambda",
+      nodeJsFunctionProps
+    );
+  }
+
+  private createLambdaFunction(
+    name: string,
+    props: LambdaFunctionProps
+  ): LambdaFunction {
+    return new LambdaFunction(this, name, {
       entry: join(__dirname, "/../src/index.ts"),
-      ...nodeJsFunctionProps,
+      ...props,
     });
   }
 }
