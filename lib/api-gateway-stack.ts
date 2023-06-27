@@ -20,7 +20,7 @@ export class ApiGatewayStack extends Stack {
       proxy: false,
     });
 
-    const productsResource = apigtw.root.addResource("product");
+    const productsResource = apigtw.root.addResource("products");
     productsResource.addMethod("GET");
     productsResource.addMethod("POST");
 
@@ -38,7 +38,7 @@ export class ApiGatewayStack extends Stack {
     categoryResource.addMethod("PUT");
     categoryResource.addMethod("DELETE");
 
-    const dealsResource = apigtw.root.addResource("categories");
+    const dealsResource = apigtw.root.addResource("deals");
     dealsResource.addMethod("GET");
     dealsResource.addMethod("POST");
 
