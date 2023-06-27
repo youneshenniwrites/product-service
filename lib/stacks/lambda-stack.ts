@@ -12,7 +12,9 @@ interface LambdaStackProps {
 }
 
 export class LambdaStack extends Stack {
-  public readonly productLambda: LambdaFunction;
+  public readonly productsLambda: LambdaFunction;
+  public readonly categoriesLambda: LambdaFunction;
+  public readonly dealsLambda: LambdaFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id);
@@ -27,7 +29,7 @@ export class LambdaStack extends Stack {
       runtime: Runtime.NODEJS_18_X,
     };
 
-    this.productLambda = this.createLambdaFunction(
+    this.productsLambda = this.createLambdaFunction(
       "productLambda",
       nodeJsFunctionProps
     );

@@ -4,13 +4,13 @@ import { IFunction } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 
 interface ApiGatewayStackProps {
-  productLambda: IFunction;
+  productsLambda: IFunction;
 }
 
 export class ApiGatewayStack extends Stack {
   constructor(scope: Construct, id: string, props: ApiGatewayStackProps) {
     super(scope, id);
-    this.createApiGtw("product", props.productLambda);
+    this.createApiGtw("product", props.productsLambda);
   }
 
   private createApiGtw(apiName: string, lambdaFunction: IFunction) {
