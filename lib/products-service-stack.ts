@@ -6,9 +6,17 @@ import { LambdaStack, ApiGatewayStack } from "./stacks";
 export class ProductsServiceStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
-    const { productsLambda } = new LambdaStack(this, "ProductsLambda", {
-      bucket: "FOO",
+    const { productsLambda, categoriesLambda, dealsLambda } = new LambdaStack(
+      this,
+      "ProductsLambda",
+      {
+        bucket: process.env.BUCKET_NAME!,
+      }
+    );
+    new ApiGatewayStack(this, "ProductsApiGateway", {
+      productsLambda,
+      categoriesLambda,
+      dealsLambda,
     });
-    new ApiGatewayStack(this, "ProductsApiGateway", { productsLambda });
   }
 }

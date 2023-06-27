@@ -1,4 +1,4 @@
-import { Stack } from "aws-cdk-lib";
+import { Duration, Stack } from "aws-cdk-lib";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import {
   NodejsFunction as LambdaFunction,
@@ -27,10 +27,21 @@ export class LambdaStack extends Stack {
         BUCKET_NAME: props.bucket,
       },
       runtime: Runtime.NODEJS_18_X,
+      timeout: Duration.seconds(10),
     };
 
     this.productsLambda = this.createLambdaFunction(
-      "productLambda",
+      "productsLambda",
+      nodeJsFunctionProps
+    );
+
+    this.categoriesLambda = this.createLambdaFunction(
+      "categoriesLambda",
+      nodeJsFunctionProps
+    );
+
+    this.dealsLambda = this.createLambdaFunction(
+      "dealsLambda",
       nodeJsFunctionProps
     );
   }
@@ -40,7 +51,7 @@ export class LambdaStack extends Stack {
     props: LambdaFunctionProps
   ): LambdaFunction {
     return new LambdaFunction(this, name, {
-      entry: join(__dirname, "/../src/index.ts"),
+      entry: join(__dirname, "/../src/api/index.ts"),
       ...props,
     });
   }

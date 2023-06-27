@@ -1,50 +1,73 @@
 import { Stack } from "aws-cdk-lib";
-import { LambdaRestApi } from "aws-cdk-lib/aws-apigateway";
+import { LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
 import { IFunction } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 
+interface ResourceType {
+  name: string;
+  methods: string[];
+  child?: ResourceType;
+}
 interface ApiGatewayStackProps {
   productsLambda: IFunction;
+  categoriesLambda: IFunction;
+  dealsLambda: IFunction;
 }
 
 export class ApiGatewayStack extends Stack {
   constructor(scope: Construct, id: string, props: ApiGatewayStackProps) {
     super(scope, id);
-    this.createApiGtw("product", props.productsLambda);
+    this.createApiGateway("products-service", props);
   }
 
-  private createApiGtw(apiName: string, lambdaFunction: IFunction) {
-    const apigtw = new LambdaRestApi(this, `${apiName}-ApiGtw`, {
-      restApiName: `${apiName}-ApiGtw`,
-      handler: lambdaFunction,
-      proxy: false,
+  private createApiGateway(
+    apiName: string,
+    { productsLambda, categoriesLambda, dealsLambda }: ApiGatewayStackProps
+  ) {
+    const apiGateway = new RestApi(this, `${apiName}-ApiGtw`);
+
+    this.createEndpoints(productsLambda, apiGateway, {
+      name: "products",
+      methods: ["GET", "POST"],
+      child: {
+        name: "{id}",
+        methods: ["GET", "PUT", "DELETE"],
+      },
     });
 
-    const productsResource = apigtw.root.addResource("products");
-    productsResource.addMethod("GET");
-    productsResource.addMethod("POST");
+    this.createEndpoints(categoriesLambda, apiGateway, {
+      name: "categories",
+      methods: ["GET", "POST"],
+      child: {
+        name: "{id}",
+        methods: ["GET", "PUT", "DELETE"],
+      },
+    });
 
-    const productResource = productsResource.addResource("{id}");
-    productResource.addMethod("GET");
-    productResource.addMethod("PUT");
-    productResource.addMethod("DELETE");
+    this.createEndpoints(dealsLambda, apiGateway, {
+      name: "deals",
+      methods: ["GET", "POST"],
+      child: {
+        name: "{id}",
+        methods: ["GET", "PUT", "DELETE"],
+      },
+    });
+  }
 
-    const categoriesResource = apigtw.root.addResource("categories");
-    categoriesResource.addMethod("GET");
-    categoriesResource.addMethod("POST");
+  private createEndpoints(
+    lambdaFunction: IFunction,
+    apiGateway: RestApi,
+    { name, methods, child }: ResourceType
+  ) {
+    const lambdaIntegration = new LambdaIntegration(lambdaFunction);
+    const rootResource = apiGateway.root.addResource(name);
+    methods.map((item) => rootResource.addMethod(item, lambdaIntegration));
 
-    const categoryResource = categoriesResource.addResource("{id}");
-    categoryResource.addMethod("GET");
-    categoryResource.addMethod("PUT");
-    categoryResource.addMethod("DELETE");
-
-    const dealsResource = apigtw.root.addResource("deals");
-    dealsResource.addMethod("GET");
-    dealsResource.addMethod("POST");
-
-    const dealResource = dealsResource.addResource("{id}");
-    dealResource.addMethod("GET");
-    dealResource.addMethod("PUT");
-    dealResource.addMethod("DELETE");
+    if (child) {
+      const childResource = rootResource.addResource(child.name);
+      child.methods.map((item) =>
+        childResource.addMethod(item, lambdaIntegration)
+      );
+    }
   }
 }
