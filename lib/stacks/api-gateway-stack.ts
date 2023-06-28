@@ -61,11 +61,11 @@ export class ApiGatewayStack extends Stack {
   ) {
     const lambdaIntegration = new LambdaIntegration(lambdaFunction);
     const rootResource = apiGateway.root.addResource(name);
-    methods.map((item) => rootResource.addMethod(item, lambdaIntegration));
+    methods.forEach((item) => rootResource.addMethod(item, lambdaIntegration));
 
     if (child) {
       const childResource = rootResource.addResource(child.name);
-      child.methods.map((item) =>
+      child.methods.forEach((item) =>
         childResource.addMethod(item, lambdaIntegration)
       );
     }
